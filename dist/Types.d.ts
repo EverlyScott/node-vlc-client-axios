@@ -87,7 +87,7 @@ export interface SubtitleTrack extends Track {
 }
 export interface AlbumArtResult {
     contentType: string;
-    blob: Blob;
+    buffer: ArrayBuffer;
 }
 export interface PlayFileOptions {
     noaudio?: boolean;

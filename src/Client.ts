@@ -468,7 +468,7 @@ export default class Client {
 
   private async requestPlaylist(): Promise<PlaylistEntry[]> {
     const response = await this.request("/requests/playlist.json");
-    return Client.parsePlaylistEntries(response.body as unknown as Blob);
+    return Client.parsePlaylistEntries(response.body as unknown as ArrayBuffer);
   }
 
   private async requestBrowse(dir: string): Promise<VlcFile[]> {
@@ -497,7 +497,7 @@ export default class Client {
 
     return {
       contentType: (response.headers["Content-Type"] || response.headers["content-type"]) as string,
-      blob: response.body,
+      buffer: response.body,
     };
   }
 
@@ -505,7 +505,7 @@ export default class Client {
     urlPath: string,
     query?: any
   ): Promise<{
-    body: Blob;
+    body: ArrayBuffer;
     headers: { [key: string]: AxiosHeaderValue };
     complete: boolean;
     statusCode: number;
@@ -528,7 +528,7 @@ export default class Client {
 
     const response = await axios.get(url, {
       headers,
-      responseType: "blob",
+      responseType: "arraybuffer",
     });
 
     // this.log(response.body.toString());
@@ -561,8 +561,8 @@ export default class Client {
     }
   }
 
-  private static parsePlaylistEntries(blob: Blob): PlaylistEntry[] {
-    const playlistResponse = JSON.parse(blob.toString());
+  private static parsePlaylistEntries(buffer: ArrayBuffer): PlaylistEntry[] {
+    const playlistResponse = JSON.parse(buffer.toString());
 
     return playlistResponse.children
       .find((c) => c.name === "Playlist")
