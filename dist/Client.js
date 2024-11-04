@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Types_1 = require("./Types");
-const phin = require("phin");
+const axios_1 = require("axios");
 const querystring_1 = require("querystring");
 const path_1 = require("path");
 const VlcClientError_1 = require("./VlcClientError");
@@ -63,7 +63,7 @@ class Client {
     playFromPlaylist(entryId) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.sendCommand("pl_play", {
-                id: entryId
+                id: entryId,
             });
         });
     }
@@ -96,7 +96,7 @@ class Client {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             const params = {
-                input: uri
+                input: uri,
             };
             if (options === null || options === void 0 ? void 0 : options.noaudio) {
                 params.option = "noaudio";
@@ -108,8 +108,8 @@ class Client {
             if (options === null || options === void 0 ? void 0 : options.wait) {
                 const startTime = Date.now();
                 const timeout = (_a = options === null || options === void 0 ? void 0 : options.timeout) !== null && _a !== void 0 ? _a : 3000;
-                const fileName = (0, path_1.basename)(uri);
-                return new Promise(res => {
+                const fileName = path_1.basename(uri);
+                return new Promise((res) => {
                     let interval = setInterval(() => __awaiter(this, void 0, void 0, function* () {
                         if (Date.now() - startTime > timeout) {
                             clearInterval(interval);
@@ -127,14 +127,14 @@ class Client {
     jumpForward(seconds) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.sendCommand("seek", {
-                val: `+${seconds}`
+                val: `+${seconds}`,
             });
         });
     }
     jumpBackwards(seconds) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.sendCommand("seek", {
-                val: `-${seconds}`
+                val: `-${seconds}`,
             });
         });
     }
@@ -150,7 +150,7 @@ class Client {
     increaseVolume(increaseBy) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.sendCommand("volume", {
-                val: `+${Math.floor(increaseBy * 5.12)}`
+                val: `+${Math.floor(increaseBy * 5.12)}`,
             });
         });
     }
@@ -161,7 +161,7 @@ class Client {
     decreaseVolume(decreaseBy) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.sendCommand("volume", {
-                val: `-${Math.floor(decreaseBy * 5.12)}`
+                val: `-${Math.floor(decreaseBy * 5.12)}`,
             });
         });
     }
@@ -410,7 +410,7 @@ class Client {
     setVolume(volume) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.sendCommand("volume", {
-                val: Math.floor(512 * volume / 100)
+                val: Math.floor((512 * volume) / 100),
             });
         });
     }
@@ -438,7 +438,7 @@ class Client {
                 return;
             }
             yield this.sendCommand("aspectratio", {
-                val: ar
+                val: ar,
             });
         });
     }
@@ -529,8 +529,8 @@ class Client {
             const response = yield this.request("/requests/browse.json", { dir });
             const browseResult = JSON.parse(response.body.toString());
             if (Array.isArray(browseResult === null || browseResult === void 0 ? void 0 : browseResult.element)) {
-                let files = browseResult.element.filter(e => e.name && e.name !== "..");
-                files.forEach(e => e.path = (0, path_2.normalize)(e.path));
+                let files = browseResult.element.filter((e) => e.name && e.name !== "..");
+                files.forEach((e) => (e.path = path_2.normalize(e.path)));
                 return files;
             }
             else {
@@ -543,13 +543,13 @@ class Client {
             let query;
             if (playlistEntryId) {
                 query = {
-                    item: playlistEntryId
+                    item: playlistEntryId,
                 };
             }
             const response = yield this.request("/art", query);
             return {
                 contentType: (response.headers["Content-Type"] || response.headers["content-type"]),
-                buffer: response.body
+                buffer: response.body,
             };
         });
     }
@@ -557,25 +557,29 @@ class Client {
         return __awaiter(this, void 0, void 0, function* () {
             const auth = `${this.options.username}:${this.options.password}`;
             const headers = {
-                "Authorization": `Basic ${Buffer.from(auth).toString("base64")}`,
+                Authorization: `Basic ${Buffer.from(auth).toString("base64")}`,
             };
             let url = `http://${this.options.ip}:${this.options.port}${urlPath}`;
             if (query) {
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
-                url += `?${(0, querystring_1.stringify)(query)}`;
+                url += `?${querystring_1.stringify(query)}`;
             }
             // this.log(url);
-            const response = yield phin({
-                url,
-                method: "GET",
+            const response = yield axios_1.default.get(url, {
                 headers,
             });
             // this.log(response.body.toString());
-            if (response.complete && response.statusCode === 200) {
-                return response;
+            if (response.status === 200 && typeof response.headers.toJSON === "function") {
+                return {
+                    body: response.data,
+                    headers: response.headers.toJSON(true),
+                    complete: true,
+                    statusCode: response.status,
+                    statusMessage: response.statusText,
+                };
             }
             else {
-                throw new Error(`Request error | Code ${response.statusCode} | Message ${response.statusMessage}`);
+                throw new Error(`Request error | Code ${response.status} | Message ${response.statusText}`);
             }
         });
     }
@@ -594,14 +598,13 @@ class Client {
     static parsePlaylistEntries(buffer) {
         const playlistResponse = JSON.parse(buffer.toString());
         return playlistResponse.children
-            .find(c => c.name === "Playlist")
-            .children
-            .map(pe => ({
+            .find((c) => c.name === "Playlist")
+            .children.map((pe) => ({
             id: pe.id,
             name: pe.name,
             duration: pe.duration,
-            isCurrent: (pe.current === "current"),
-            uri: (0, querystring_1.unescape)(pe.uri),
+            isCurrent: pe.current === "current",
+            uri: querystring_1.unescape(pe.uri),
         }));
     }
     static validateOptions(options) {
@@ -611,7 +614,7 @@ class Client {
         if (typeof options.port !== "number") {
             throw new Error("Port is required and should be a number");
         }
-        if (options.username !== undefined && options.username !== null && (typeof options.username !== "string")) {
+        if (options.username !== undefined && options.username !== null && typeof options.username !== "string") {
             throw new Error("Username should be a string");
         }
         else {
@@ -620,7 +623,7 @@ class Client {
         if (typeof options.password !== "string") {
             throw new Error("Password is required and should be a string");
         }
-        options.log = (options.log === true);
+        options.log = options.log === true;
         return options;
     }
 }
