@@ -549,7 +549,7 @@ class Client {
             const response = yield this.request("/art", query);
             return {
                 contentType: (response.headers["Content-Type"] || response.headers["content-type"]),
-                buffer: response.body,
+                blob: response.body,
             };
         });
     }
@@ -567,6 +567,7 @@ class Client {
             // this.log(url);
             const response = yield axios_1.default.get(url, {
                 headers,
+                responseType: "blob",
             });
             // this.log(response.body.toString());
             if (response.status === 200 && typeof response.headers.toJSON === "function") {
@@ -595,8 +596,8 @@ class Client {
             console.error(...args);
         }
     }
-    static parsePlaylistEntries(buffer) {
-        const playlistResponse = JSON.parse(buffer.toString());
+    static parsePlaylistEntries(blob) {
+        const playlistResponse = JSON.parse(blob.toString());
         return playlistResponse.children
             .find((c) => c.name === "Playlist")
             .children.map((pe) => ({
