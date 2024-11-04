@@ -516,7 +516,7 @@ export default class Client {
     const auth = `${this.options.username}:${this.options.password}`;
 
     const headers = {
-      Authorization: `Basic ${Buffer.from(auth).toString("base64")}`,
+      Authorization: `Basic ${btoa(auth)}`,
     };
 
     let url = `http://${this.options.ip}:${this.options.port}${urlPath}`;

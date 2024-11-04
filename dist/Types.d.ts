@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export interface ClientOptions {
     ip: string;
     port: number;

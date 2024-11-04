@@ -11,10 +11,10 @@ var AspectRatio;
     AspectRatio["_221_100"] = "221:100";
     AspectRatio["_235_100"] = "235:100";
     AspectRatio["_239_100"] = "239:100";
-})(AspectRatio = exports.AspectRatio || (exports.AspectRatio = {}));
+})(AspectRatio || (exports.AspectRatio = AspectRatio = {}));
 var VlcFileType;
 (function (VlcFileType) {
     VlcFileType["FILE"] = "file";
     VlcFileType["DIR"] = "dir";
-})(VlcFileType = exports.VlcFileType || (exports.VlcFileType = {}));
+})(VlcFileType || (exports.VlcFileType = VlcFileType = {}));
 //# sourceMappingURL=Types.js.map

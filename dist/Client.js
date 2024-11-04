@@ -79,8 +79,8 @@ class Client {
      * for files in a given directory
      * @param dir The directory to browse
      */
-    browse(dir = "/") {
-        return __awaiter(this, void 0, void 0, function* () {
+    browse() {
+        return __awaiter(this, arguments, void 0, function* (dir = "/") {
             return this.requestBrowse(dir);
         });
     }
@@ -93,8 +93,8 @@ class Client {
      * @param options.timeout Time to wait for vlc to open the file
      */
     playFile(uri, options) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const params = {
                 input: uri,
             };
@@ -108,7 +108,7 @@ class Client {
             if (options === null || options === void 0 ? void 0 : options.wait) {
                 const startTime = Date.now();
                 const timeout = (_a = options === null || options === void 0 ? void 0 : options.timeout) !== null && _a !== void 0 ? _a : 3000;
-                const fileName = path_1.basename(uri);
+                const fileName = (0, path_1.basename)(uri);
                 return new Promise((res) => {
                     let interval = setInterval(() => __awaiter(this, void 0, void 0, function* () {
                         if (Date.now() - startTime > timeout) {
@@ -176,14 +176,14 @@ class Client {
         });
     }
     meta() {
-        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
             return (_c = (_b = (_a = (yield this.status())) === null || _a === void 0 ? void 0 : _a.information) === null || _b === void 0 ? void 0 : _b.category) === null || _c === void 0 ? void 0 : _c.meta;
         });
     }
     getFileName() {
-        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c, _d;
             return (_d = (_c = (_b = (_a = (yield this.status())) === null || _a === void 0 ? void 0 : _a.information) === null || _b === void 0 ? void 0 : _b.category) === null || _c === void 0 ? void 0 : _c.meta) === null || _d === void 0 ? void 0 : _d.filename;
         });
     }
@@ -524,13 +524,13 @@ class Client {
         });
     }
     requestBrowse(dir) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const response = yield this.request("/requests/browse.json", { dir });
             const browseResult = JSON.parse(response.body.toString());
             if (Array.isArray(browseResult === null || browseResult === void 0 ? void 0 : browseResult.element)) {
                 let files = browseResult.element.filter((e) => e.name && e.name !== "..");
-                files.forEach((e) => (e.path = path_2.normalize(e.path)));
+                files.forEach((e) => (e.path = (0, path_2.normalize)(e.path)));
                 return files;
             }
             else {
@@ -557,12 +557,12 @@ class Client {
         return __awaiter(this, void 0, void 0, function* () {
             const auth = `${this.options.username}:${this.options.password}`;
             const headers = {
-                Authorization: `Basic ${Buffer.from(auth).toString("base64")}`,
+                Authorization: `Basic ${btoa(auth)}`,
             };
             let url = `http://${this.options.ip}:${this.options.port}${urlPath}`;
             if (query) {
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
-                url += `?${querystring_1.stringify(query)}`;
+                url += `?${(0, querystring_1.stringify)(query)}`;
             }
             // this.log(url);
             const response = yield axios_1.default.get(url, {
@@ -604,7 +604,7 @@ class Client {
             name: pe.name,
             duration: pe.duration,
             isCurrent: pe.current === "current",
-            uri: querystring_1.unescape(pe.uri),
+            uri: (0, querystring_1.unescape)(pe.uri),
         }));
     }
     static validateOptions(options) {
