@@ -522,9 +522,18 @@ export default class Client {
 
     let url = `http://${this.options.ip}:${this.options.port}${urlPath}`;
 
+    const serialize = (obj: { [key: string]: string }) => {
+      const str = [];
+      for (const p in obj)
+        if (obj.hasOwnProperty(p)) {
+          str.push(`${encodeURIComponent(p)}=${encodeURIComponent(obj[p])}`);
+        }
+      return str.join("&");
+    };
+
     if (query) {
       headers["Content-Type"] = "application/x-www-form-urlencoded";
-      url += `?${encodeURIComponent(query)}`;
+      url += `?${serialize(query)}`;
     }
 
     // this.log(url);
