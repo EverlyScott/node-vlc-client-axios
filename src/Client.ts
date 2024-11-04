@@ -463,7 +463,8 @@ export default class Client {
 
   private async requestStatus(data?: any): Promise<VlcStatus> {
     let response = await this.request("/requests/status.json", data);
-    return JSON.parse(response.body.toString());
+    const body = new TextDecoder().decode(response.body);
+    return JSON.parse(body);
   }
 
   private async requestPlaylist(): Promise<PlaylistEntry[]> {
@@ -474,14 +475,16 @@ export default class Client {
   private async requestBrowse(dir: string): Promise<VlcFile[]> {
     const response = await this.request("/requests/browse.json", { dir });
 
-    const browseResult = <BrowseResponse>JSON.parse(response.body.toString());
+    const body = new TextDecoder().decode(response.body);
+    const browseResult = <BrowseResponse>JSON.parse(body);
 
     if (Array.isArray(browseResult?.element)) {
       let files = browseResult.element.filter((e) => e.name && e.name !== "..");
       files.forEach((e) => (e.path = normalize(e.path)));
       return files;
     } else {
-      throw new VlcClientError(`Unexpected response: ${response.body?.toString()}`);
+      const body = new TextDecoder().decode(response.body);
+      throw new VlcClientError(`Unexpected response: ${body}`);
     }
   }
 
@@ -562,7 +565,8 @@ export default class Client {
   }
 
   private static parsePlaylistEntries(buffer: ArrayBuffer): PlaylistEntry[] {
-    const playlistResponse = JSON.parse(buffer.toString());
+    const text = new TextDecoder().decode(buffer);
+    const playlistResponse = JSON.parse(text);
 
     return playlistResponse.children
       .find((c) => c.name === "Playlist")
