@@ -15,10 +15,8 @@ import {
   VlcStatus,
 } from "./Types";
 import axios, { AxiosHeaderValue } from "axios";
-import { stringify as encodeQuery, unescape } from "querystring";
-import { basename } from "path";
+import { basename, normalize } from "path-browserify";
 import VlcClientError from "./VlcClientError";
-import { normalize } from "path";
 
 export default class Client {
   private readonly options: ClientOptions;
@@ -523,7 +521,7 @@ export default class Client {
 
     if (query) {
       headers["Content-Type"] = "application/x-www-form-urlencoded";
-      url += `?${encodeQuery(query)}`;
+      url += `?${encodeURIComponent(query)}`;
     }
 
     // this.log(url);

@@ -11,10 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const Types_1 = require("./Types");
 const axios_1 = require("axios");
-const querystring_1 = require("querystring");
-const path_1 = require("path");
+const path_browserify_1 = require("path-browserify");
 const VlcClientError_1 = require("./VlcClientError");
-const path_2 = require("path");
 class Client {
     constructor(options) {
         this.options = Client.validateOptions(options);
@@ -108,7 +106,7 @@ class Client {
             if (options === null || options === void 0 ? void 0 : options.wait) {
                 const startTime = Date.now();
                 const timeout = (_a = options === null || options === void 0 ? void 0 : options.timeout) !== null && _a !== void 0 ? _a : 3000;
-                const fileName = (0, path_1.basename)(uri);
+                const fileName = (0, path_browserify_1.basename)(uri);
                 return new Promise((res) => {
                     let interval = setInterval(() => __awaiter(this, void 0, void 0, function* () {
                         if (Date.now() - startTime > timeout) {
@@ -530,7 +528,7 @@ class Client {
             const browseResult = JSON.parse(response.body.toString());
             if (Array.isArray(browseResult === null || browseResult === void 0 ? void 0 : browseResult.element)) {
                 let files = browseResult.element.filter((e) => e.name && e.name !== "..");
-                files.forEach((e) => (e.path = (0, path_2.normalize)(e.path)));
+                files.forEach((e) => (e.path = (0, path_browserify_1.normalize)(e.path)));
                 return files;
             }
             else {
@@ -562,7 +560,7 @@ class Client {
             let url = `http://${this.options.ip}:${this.options.port}${urlPath}`;
             if (query) {
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
-                url += `?${(0, querystring_1.stringify)(query)}`;
+                url += `?${encodeURIComponent(query)}`;
             }
             // this.log(url);
             const response = yield axios_1.default.get(url, {
@@ -605,7 +603,7 @@ class Client {
             name: pe.name,
             duration: pe.duration,
             isCurrent: pe.current === "current",
-            uri: (0, querystring_1.unescape)(pe.uri),
+            uri: unescape(pe.uri),
         }));
     }
     static validateOptions(options) {
